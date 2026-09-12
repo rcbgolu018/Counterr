@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Real-Time Exam Tracker</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f172a;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      text-align: center;
+    }
+    .badge {
+      background: #ef4444;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      letter-spacing: 1px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .badge::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: #fff;
+      border-radius: 50%;
+      animation: pulse 1.2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(0.8); }
+    }
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #38bdf8;
+      margin-bottom: 24px;
+      word-break: break-word;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      width: 100%;
+      max-width: 320px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 16px;
+      border-radius: 14px;
+    }
+    .num {
+      font-size: 38px;
+      font-weight: 900;
+      color: #f8fafc;
+      line-height: 1.1;
+    }
+    .label {
+      font-size: 11px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-top: 4px;
+    }
+    .quote {
+      font-size: 13px;
+      color: #64748b;
+      font-style: italic;
+      max-width: 280px;
+    }
+  </style>
+</head>
+<body>
+  <div class="badge">LIVE 24/7</div>
+  <h1 id="title">Loading...</h1>
+
+  <div class="grid">
+    <div class="card"><div class="num" id="days">00</div><div class="label">Days</div></div>
+    <div class="card"><div class="num" id="hours">00</div><div class="label">Hours</div></div>
+    <div class="card"><div class="num" id="mins">00</div><div class="label">Minutes</div></div>
+    <div class="card"><div class="num" id="secs">00</div><div class="label">Seconds</div></div>
+  </div>
+
+  <div class="quote">"Har ek second jo abhi bacha hai, wahi tumhari rank banayega."</div>
+
+  <script>
+    window.Telegram?.WebApp?.ready();
+    window.Telegram?.WebApp?.expand();
+
+    const params = new URLSearchParams(window.location.search);
+    const targetName = params.get("name") || "Exam";
+    const targetDateStr = params.get("date"); // ISO format: YYYY-MM-DDTHH:mm:ss
+
+    document.getElementById("title").textContent = targetName;
+
+    function updateTimer() {
+      if (!targetDateStr) {
+        document.getElementById("title").textContent = "No Date Found";
+        return;
+      }
+
+      const target = new Date(targetDateStr).getTime();
+      const now = new Date().getTime();
+      const diff = target - now;
+
+      if (diff <= 0) {
+        document.getElementById("title").textContent = "Exam Started!";
+        document.getElementById("days").textContent = "00";
+        document.getElementById("hours").textContent = "00";
+        document.getElementById("mins").textContent = "00";
+        document.getElementById("secs").textContent = "00";
+        return;
+      }
+
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+      document.getElementById("days").textContent = String(d).padStart(2, "0");
+      document.getElementById("hours").textContent = String(h).padStart(2, "0");
+      document.getElementById("mins").textContent = String(m).padStart(2, "0");
+      document.getElementById("secs").textContent = String(s).padStart(2, "0");
+    }
+
+    setInterval(updateTimer, 1000);
+    updateTimer();
+  </script>
+</body>
+</html>
